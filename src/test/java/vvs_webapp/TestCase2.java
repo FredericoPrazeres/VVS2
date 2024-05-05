@@ -17,7 +17,7 @@ import java.io.*;
 import java.util.*;
 
 
-public class TestCase2a{
+public class TestCase2{
 	
 	
 	private static final String APPLICATION_URL = "http://localhost:8080/VVS_webappdemo/";
@@ -64,6 +64,7 @@ public class TestCase2a{
 		vatInput2.setValueAttribute(VAT);
 		HtmlPage newPage = submit2.click();
 		
+		//Foi necessário inserir este table1 id
 		int count = 0;
 		if( newPage.getElementById("table1") != null) { // Tabela existe
 			HtmlTable table = newPage.getHtmlElementById("table1");
@@ -225,8 +226,75 @@ public class TestCase2a{
 		
 	}
 	
+	@Test
+	public void newSale() throws IOException {
+		
+		String VAT = "168027852";
+		
+		/* Ver quantas sales existem do cliente */
+		
+		HtmlAnchor getCustomerLink1 = page.getAnchorByHref("getSales.html");		
+		HtmlPage nextPage1 = (HtmlPage) getCustomerLink1.openLinkInNewWindow();
+		
+		HtmlForm getCustomerForm1 = nextPage1.getForms().get(0);
+		HtmlInput vatInput1 = getCustomerForm1.getInputByName("customerVat");
+		HtmlInput submit1 = getCustomerForm1.getInputByValue("Get Sales");
+		
+		vatInput1.setValueAttribute(VAT);
+		HtmlPage salesPage1 = (HtmlPage) submit1.click();
+		
+		
+		int count = 0;
+		if( salesPage1.getElementById("table1") != null) { // Tabela existe
+			HtmlTable table = salesPage1.getHtmlElementById("table1");
+			for (final HtmlTableRow row : table.getRows()) {
+			    count++;
+			}
+		}
+		
+		/* Inserir sale no cliente */
+		
+		HtmlAnchor getCustomerLink2 = page.getAnchorByHref("addSale.html");
+		HtmlPage nextPage2 = (HtmlPage) getCustomerLink2.openLinkInNewWindow();
+		
+		HtmlForm getCustomerForm2 = nextPage2.getForms().get(0);
+		HtmlInput vatInput2 = getCustomerForm2.getInputByName("customerVat");
+		HtmlInput submit2 = getCustomerForm2.getInputByValue("Add Sale");
+		
+		vatInput2.setValueAttribute(VAT);
+		submit2.click();
+		
+		/* Verificar que ela está na tabela */
+		
+		HtmlAnchor getCustomerLink3= page.getAnchorByHref("getSales.html");		
+		HtmlPage nextPage3 = (HtmlPage) getCustomerLink3.openLinkInNewWindow();
+		
+		HtmlForm getCustomerForm3 = nextPage3.getForms().get(0);
+		HtmlInput vatInput3 = getCustomerForm3.getInputByName("customerVat");
+		HtmlInput submit3 = getCustomerForm3.getInputByValue("Get Sales");
+		
+		vatInput1.setValueAttribute(VAT);
+		HtmlPage salesPage2 = (HtmlPage) submit1.click();
+		
+		
+		int count2 = 0;
+		
+		if( salesPage2.getElementById("table1") != null) { // Tabela existe
+			HtmlTable table = salesPage2.getHtmlElementById("table1");
+			for (final HtmlTableRow row : table.getRows()) {
+			    count2++;
+			}
+		}
+		
+		if(count==0) {
+			assertNotEquals(0,count2);
+		}else {
+			assertEquals(count+1,count2);
+		}
 	
-	
+		
+		
+	}
 	
 	
 	
