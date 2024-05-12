@@ -26,7 +26,7 @@
                 <br>
 </FORM>
 <c:if test = "${salesHelper.getSales().size() > 0}">
-	<table class="w3-table w3-bordered">
+	<table class="w3-table w3-bordered" id="table1">
 	<tr class="w3-black">
 		<th>Id</th>
 		<th>Date</th>
