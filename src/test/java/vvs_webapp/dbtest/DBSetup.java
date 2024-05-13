@@ -33,8 +33,7 @@ public class DBSetup {
 	//////////////////////////////////////////
 	// Operations for populating test database
 
-	public static final Operation DELETE_ALL =
-			 deleteAllFrom("CUSTOMER", "SALE", "ADDRESS", "SALEDELIVERY");
+	public static final Operation DELETE_ALL = deleteAllFrom("CUSTOMER", "SALE", "ADDRESS", "SALEDELIVERY");
 	public static final int NUM_INIT_CUSTOMERS;
 	public static final int NUM_INIT_SALES;
 	public static final int NUM_INIT_ADDRESSES;

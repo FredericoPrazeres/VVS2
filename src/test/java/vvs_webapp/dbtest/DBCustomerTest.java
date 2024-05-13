@@ -7,6 +7,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.SQLException;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -212,6 +214,47 @@ public class DBCustomerTest{
 		assertEquals(numberOfSales+1,SaleService.INSTANCE.getAllSales().sales.size());
 		
 	}
+	
+	
+	/*
+	 * This method tests if you can add a sale delivery several times to the same sale
+	 * 
+	 * Expected: Not being able to add a delivery to the same sale
+	 * 
+	 * Actual: You can add deliveries to the same sale.
+	 * 
+	 */
+	@Test
+	public void testRemovingSaleAndSaleDelivery() throws ApplicationException {
+		
+		int numberOfSales = SaleService.INSTANCE.getAllSales().sales.size();
+		
+		int vat = 274658933;
+		
+		CustomerService.INSTANCE.addCustomer(vat, "Frederico", 912002333);	
+		CustomerDTO customer = CustomerService.INSTANCE.getCustomerByVat(vat);
+		assertNotNull(customer);
+		
+		CustomerService.INSTANCE.addAddressToCustomer(vat, "Rua dos Arneiros");
+		int addressID = CustomerService.INSTANCE.getAllAddresses(vat).addrs.get(0).id;
+		
+		SaleService.INSTANCE.addSale(vat);
+		SalesDTO sales = SaleService.INSTANCE.getSaleByCustomerVat(vat);
+		assertNotNull(sales.sales.get(0));
+		int id = sales.sales.get(0).id;
+		
+		int before = SaleService.INSTANCE.getSalesDeliveryByVat(vat).sales_delivery.size();
+		
+		SaleService.INSTANCE.addSaleDelivery(id, addressID);
+		SaleService.INSTANCE.addSaleDelivery(id, addressID);
+		
+		int after = SaleService.INSTANCE.getSalesDeliveryByVat(vat).sales_delivery.size();
+		
+		assertEquals(before+1,after);
+		
+	}
+	
+	
 	
 	
 	private boolean hasClient(int vat) throws ApplicationException {

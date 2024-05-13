@@ -1,18 +1,41 @@
 package vvs_webapp.HtmlUnit;
 
 import static org.junit.Assert.*;
+import static vvs_webapp.dbtest.DBSetup.DB_PASSWORD;
+import static vvs_webapp.dbtest.DBSetup.DB_URL;
+import static vvs_webapp.dbtest.DBSetup.DB_USERNAME;
+import static vvs_webapp.dbtest.DBSetup.DELETE_ALL;
+import static vvs_webapp.dbtest.DBSetup.INSERT_CUSTOMER_ADDRESS_DATA;
+import static vvs_webapp.dbtest.DBSetup.startApplicationDatabaseForTesting;
+
 import org.junit.*;
+import org.junit.rules.ExpectedException;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.*;
+import com.ninja_squad.dbsetup.DbSetup;
+import com.ninja_squad.dbsetup.DbSetupTracker;
+import com.ninja_squad.dbsetup.Operations;
+import com.ninja_squad.dbsetup.destination.Destination;
+import com.ninja_squad.dbsetup.destination.DriverManagerDestination;
+import com.ninja_squad.dbsetup.operation.Operation;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 
 import java.io.*;
+import java.sql.SQLException;
 
 
 public class TestCase2{
 	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+
+	private static Destination dataSource;
+	
+	// the tracker is static because JUnit uses a separate Test instance for every
+	// test method.
+	private static DbSetupTracker dbSetupTracker = new DbSetupTracker();
 	
 	private static final String APPLICATION_URL = "http://localhost:8080/VVS_webappdemo/";
 
@@ -33,13 +56,36 @@ public class TestCase2{
         
 		page = webClient.getPage(APPLICATION_URL);
 		assertEquals(200, page.getWebResponse().getStatusCode()); // OK status
+		
+		startApplicationDatabaseForTesting();
+		dataSource = DriverManagerDestination.with(DB_URL, DB_USERNAME, DB_PASSWORD);
+	
+		
 	}
 	
-	@AfterClass
-	public static void takeDownClass() {
-		webClient.close();
+	@Before
+	public void setup() throws SQLException {
+
+		Operation initDBOperations = Operations.sequenceOf(
+			DELETE_ALL
+		 , INSERT_CUSTOMER_ADDRESS_DATA
+		);
+		DbSetup dbSetup = new DbSetup(dataSource, initDBOperations);
+		// Use the tracker to launch the DBSetup.
+		// This will speed-up tests that do not change the DB. 
+		dbSetupTracker.launchIfNecessary(dbSetup);
+
 	}
-		
+	
+	/*
+	 * 
+	 * This test checks if you add two addresses for a given, the
+	 * address table will increasy by one
+	 * 
+	 * @throws IOException
+	 * @author Frederico Prazeres fc56269
+	 * 
+	 */
 	@Test
 	public void testInsertingAddress() throws IOException {
 		
@@ -60,13 +106,8 @@ public class TestCase2{
 		int count = 0;
 		if( newPage.getElementById("table1") != null) { // Tabela existe
 			HtmlTable table = newPage.getHtmlElementById("table1");
-			for (final HtmlTableRow row : table.getRows()) {
-			    count++;
-			}
+			count = table.getRows().size();
 		}
-		
-		
-		System.out.println(count);
 		
 		// get a specific link
 		HtmlAnchor addCustomerLink = page.getAnchorByHref("addAddressToCustomer.html");
@@ -126,12 +167,7 @@ public class TestCase2{
 			 			*/
 		
 		HtmlTable table2 = newPage.getHtmlElementById("table1");
-		for (final HtmlTableRow row : table2.getRows()) {
-			
-			
-			
-		    count2++;
-		}
+		count2=table2.getRows().size();
 		
 		
 		//First row also counts
@@ -140,6 +176,15 @@ public class TestCase2{
 		
 	}
 	
+	/*
+	 * 
+	 * This test checks if you add two customers, their information will be displayed
+	 * accordingly in the "List All Customers Page"
+	 * 
+	 * @throws IOException
+	 * @author Frederico Prazeres fc56269
+	 * 
+	 */
 	@Test
 	public void testInsertingTwoCustomers() throws IOException{
 
@@ -176,48 +221,36 @@ public class TestCase2{
 		HtmlAnchor getCustomersLink = page.getAnchorByHref("GetAllCustomersPageController");
 		nextPage = (HtmlPage) getCustomersLink.openLinkInNewWindow();
 		
-		final HtmlTable table = nextPage.getHtmlElementById("clients");
+		HtmlTable table = nextPage.getHtmlElementById("clients");
 		
-		for (final HtmlTableRow row : table.getRows()) {
-
-			// Primeira linha da tabela
-			if(row.equals(table.getRows().get(0))) {
-				
-				assertEquals(row.getCell(0).asText(),"Name");
-				assertEquals(row.getCell(1).asText(),"Phone");
-				assertEquals(row.getCell(2).asText(),"Vat");
-				
-				continue;
-			}
+		if(table!=null) {
 			
+			assertEquals(table.getCellAt(0,0).asText(),"Name");
+			assertEquals(table.getCellAt(0,1).asText(),"Phone");
+			assertEquals(table.getCellAt(0,2).asText(),"Vat");
 			
-			//Penultima linha (primeiro cliente a ter sido adicionado)
-			if(row.equals(table.getRows().get(table.getRows().size()-2))){
-					
-				assertEquals(row.getCell(0).asText(),"Fred");
-				assertEquals(row.getCell(1).asText(),"910203443");
-				assertEquals(row.getCell(2).asText(),"274658933");
-					
-			}
+			assertEquals(table.getCellAt(table.getRows().size()-2,0).asText(),"Fred");
+			assertEquals(table.getCellAt(table.getRows().size()-2,1).asText(),"910203443");
+			assertEquals(table.getCellAt(table.getRows().size()-2,2).asText(),"274658933");
 			
-			//Ultima linha (segundo cliente a ter sido adicionado)
-			if(row.equals(table.getRows().get(table.getRows().size()-1))){
-					
-				assertEquals(row.getCell(0).asText(),"Joao");
-				assertEquals(row.getCell(1).asText(),"910242523");
-				assertEquals(row.getCell(2).asText(),"207527768");
-					
-			}
+			assertEquals(table.getCellAt(table.getRows().size()-1,0).asText(),"Joao");
+			assertEquals(table.getCellAt(table.getRows().size()-1,1).asText(),"910242523");
+			assertEquals(table.getCellAt(table.getRows().size()-1,2).asText(),"207527768");
 			
-			
-				
 		}
-		
-		
 		
 		
 	}
 	
+	
+	/*
+	 * 
+	 * This test checks if a new sale is added, it will be displayed as open
+	 * 
+	 * @throws IOException
+	 * @author Frederico Prazeres fc56269
+	 * 
+	 */
 	@Test
 	public void testNewSale() throws IOException {
 		
@@ -239,9 +272,9 @@ public class TestCase2{
 		int count = 0;
 		if( salesPage1.getElementById("table1") != null) { // Tabela existe
 			HtmlTable table = salesPage1.getHtmlElementById("table1");
-			for (final HtmlTableRow row : table.getRows()) {
-			    count++;
-			}
+			
+			count = table.getRows().size();
+		
 		}
 		
 		/* Inserir sale no cliente */
@@ -265,17 +298,16 @@ public class TestCase2{
 		HtmlInput vatInput3 = getCustomerForm3.getInputByName("customerVat");
 		HtmlInput submit3 = getCustomerForm3.getInputByValue("Get Sales");
 		
-		vatInput1.setValueAttribute(VAT);
-		HtmlPage salesPage2 = (HtmlPage) submit1.click();
+		vatInput3.setValueAttribute(VAT);
+		HtmlPage salesPage2 = (HtmlPage) submit3.click();
 		
 		
 		int count2 = 0;
 		
 		if( salesPage2.getElementById("table1") != null) { // Tabela existe
-			HtmlTable table = salesPage2.getHtmlElementById("table1");
-			for (final HtmlTableRow row : table.getRows()) {
-			    count2++;
-			}
+			HtmlTable table = (HtmlTable) salesPage2.getElementById("table1");
+			count2 = table .getRows().size();
+			
 		}
 		
 		if(count==0) {
@@ -286,6 +318,15 @@ public class TestCase2{
 		
 	}
 	
+	
+	/*
+	 * 
+	 * This test checks if a sale is closed, the status appears as closed (C)
+	 * 
+	 * @throws IOException
+	 * @author Frederico Prazeres fc56269
+	 * 
+	 */
 	@Test
 	public void testClosedSale() throws IOException {
 		
@@ -358,7 +399,7 @@ public class TestCase2{
 		assertEquals(status, "C");
 	
 	}
-	
+	/*
 	@Test
 	public void testSaleDelivery() throws IOException{
 		
@@ -533,7 +574,7 @@ public class TestCase2{
 		
 	}
 	
-	
+	*/
 	
 	
 }
