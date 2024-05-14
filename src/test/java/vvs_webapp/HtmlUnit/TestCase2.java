@@ -79,8 +79,8 @@ public class TestCase2{
 	
 	/*
 	 * 
-	 * This test checks if you add two addresses for a given, the
-	 * address table will increasy by one
+	 * This test checks if you add two addresses to a customer, the
+	 * address table will only increasy by two
 	 * 
 	 * @throws IOException
 	 * @author Frederico Prazeres fc56269
@@ -88,7 +88,6 @@ public class TestCase2{
 	 */
 	@Test
 	public void testInsertingAddress() throws IOException {
-		
 		
 		String VAT = "197672337";
 		
@@ -103,10 +102,10 @@ public class TestCase2{
 		HtmlPage newPage = submit2.click();
 		
 		//Foi necessário inserir este table1 id
-		int count = 0;
+		int countNumberOfAddressesBefore = 0;
 		if( newPage.getElementById("table1") != null) { // Tabela existe
 			HtmlTable table = newPage.getHtmlElementById("table1");
-			count = table.getRows().size();
+			countNumberOfAddressesBefore = table.getRows().size();
 		}
 		
 		// get a specific link
@@ -158,20 +157,22 @@ public class TestCase2{
 		newPage = submit2.click();
 		
 		
-		
-		int count2 = 0;
-		if(count==0)
-			count2=-1; /* Se count for 0 a tabela esta vazia. 
-						  Tira-se uma unidade a count2 
-						  porque a tabela tem sempre +1 linha (descricao dos elementos)
-			 			*/
-		
+		int countNumberOfAddressesAfter = 0;
 		HtmlTable table2 = newPage.getHtmlElementById("table1");
-		count2=table2.getRows().size();
+		if(table2!=null)
+			countNumberOfAddressesAfter=table2.getRows().size();
+		
+		
+		
+		if(countNumberOfAddressesBefore==0)
+			assertEquals(countNumberOfAddressesAfter,2);
+		else
+			assertEquals(countNumberOfAddressesBefore+2,countNumberOfAddressesAfter);
+		
 		
 		
 		//First row also counts
-		assertEquals(count+2,count2);
+		
 		
 		
 	}
@@ -187,8 +188,6 @@ public class TestCase2{
 	 */
 	@Test
 	public void testInsertingTwoCustomers() throws IOException{
-
-		
 		
 		HtmlAnchor getCustomerLink = page.getAnchorByHref("addCustomer.html");
 		HtmlPage nextPage = (HtmlPage) getCustomerLink.openLinkInNewWindow();
@@ -268,12 +267,12 @@ public class TestCase2{
 		vatInput1.setValueAttribute(VAT);
 		HtmlPage salesPage1 = (HtmlPage) submit1.click();
 		
-		
-		int count = 0;
+		// Numero de sales antes da inserção da nova sale
+		int saleCountBefore = 0;
 		if( salesPage1.getElementById("table1") != null) { // Tabela existe
 			HtmlTable table = salesPage1.getHtmlElementById("table1");
 			
-			count = table.getRows().size();
+			saleCountBefore = table.getRows().size();
 		
 		}
 		
@@ -301,20 +300,23 @@ public class TestCase2{
 		vatInput3.setValueAttribute(VAT);
 		HtmlPage salesPage2 = (HtmlPage) submit3.click();
 		
-		
-		int count2 = 0;
+		int saleCountAfter = 0;
 		
 		if( salesPage2.getElementById("table1") != null) { // Tabela existe
 			HtmlTable table = (HtmlTable) salesPage2.getElementById("table1");
-			count2 = table .getRows().size();
+			saleCountAfter = table.getRows().size();
 			
+			//Verifica que a última sale adicionada está Open e pertence ao cliente
+			assertEquals(table.getCellAt(table.getRows().size()-1,3).asText(),"O");
+			assertEquals(table.getCellAt(table.getRows().size()-1,4).asText(),VAT);
 		}
 		
-		if(count==0) {
-			assertNotEquals(0,count2);
-		}else {
-			assertEquals(count+1,count2);
-		}
+		// Verifica que foi adicionada uma nova sale à tabela
+		if(saleCountBefore==0)
+			assertEquals(1,saleCountAfter);
+		else
+			assertEquals(saleCountBefore+1,saleCountAfter);
+		
 		
 	}
 	
@@ -350,25 +352,15 @@ public class TestCase2{
 		HtmlPage nextPage2 = (HtmlPage) getCustomerLink2.openLinkInNewWindow();
 		
 		
+		HtmlTable table = nextPage2.getHtmlElementById("table1");
 		String id = "";
-		if( nextPage2.getElementById("table1") != null) { // Tabela existe
-			
-			HtmlTable table = nextPage2.getHtmlElementById("table1");
-			
+		if( table != null) { // Tabela existe
 			int tableSize = table.getRows().size();
-			
-			HtmlTableCell idCell= table.getCellAt(tableSize-1, 0);
-			id = idCell.asText();
-		
+			id = table.getCellAt(tableSize-1, 0).asText();
 		}
 		
 		
 		// CHECK SALE CLOSED
-		
-		nextPage2.refresh();
-		nextPage2.refresh();
-	
-		
 		
 		HtmlForm getSaleCloseForm = nextPage2.getForms().get(0);
 		HtmlInput idInput = getSaleCloseForm.getInputByName("id");
@@ -383,16 +375,11 @@ public class TestCase2{
 		nextPage3.refresh();
 		
 		String status = "";
-		if( nextPage3.getElementById("table1") != null) { // Tabela existe
-			
-			HtmlTable table = nextPage3.getHtmlElementById("table1");
+		table = nextPage3.getHtmlElementById("table1");
+		if( table != null) { // Tabela existe
 			
 			int tableSize = table.getRows().size();
-			System.out.println(tableSize);
-			HtmlTableCell statusCell= table.getCellAt(tableSize-1, 3);
-			status = statusCell.asText();
-		
-			System.out.println(table.getRow(tableSize-1).asText());
+			status = table.getCellAt(tableSize-1, 3).asText();
 			
 		}
 		
