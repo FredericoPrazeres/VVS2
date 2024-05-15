@@ -77,7 +77,7 @@ public class TestCase2{
 
 	}
 	
-	/*
+	/**
 	 * 
 	 * This test checks if you add two addresses to a customer, the
 	 * address table will only increasy by two
@@ -177,7 +177,7 @@ public class TestCase2{
 		
 	}
 	
-	/*
+	/**
 	 * 
 	 * This test checks if you add two customers, their information will be displayed
 	 * accordingly in the "List All Customers Page"
@@ -242,7 +242,7 @@ public class TestCase2{
 	}
 	
 	
-	/*
+	/**
 	 * 
 	 * This test checks if a new sale is added, it will be displayed as open
 	 * 
@@ -321,7 +321,7 @@ public class TestCase2{
 	}
 	
 	
-	/*
+	/**
 	 * 
 	 * This test checks if a sale is closed, the status appears as closed (C)
 	 * 
@@ -386,6 +386,8 @@ public class TestCase2{
 		assertEquals(status, "C");
 	
 	}
+	
+	
 	/*
 	@Test
 	public void testSaleDelivery() throws IOException{
