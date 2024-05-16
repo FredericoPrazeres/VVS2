@@ -35,6 +35,8 @@ public enum CustomerService {
 	public void addCustomer(int vat, String designation, int phoneNumber) throws ApplicationException {
 		if (!isValidVAT (vat))
 			throw new ApplicationException ("Invalid VAT number: " + vat);
+		else if (isPhoneNumberTaken(phoneNumber))
+			throw new ApplicationException ("Another customer already has the phone number you chose");
 		else try {
 			CustomerRowDataGateway customer = new CustomerRowDataGateway(vat, designation, phoneNumber);
 			customer.insert();
@@ -203,6 +205,31 @@ public enum CustomerService {
 		return false;
 	}
 	
+	
+	/**
+	 * Checks if another customer has the given phone number
+	 * 
+	 * @param phoneNumber The phone number
+	 * 
+	 * @return true if someone already has the given phone number, false if it doesn't
+	 * @author Frederico Prazeres fc56269
+	 * 
+	 */
+	public boolean isPhoneNumberTaken(int phoneNumber) throws ApplicationException {
+		
+		CustomersDTO customers = CustomerService.INSTANCE.getAllCustomers();
+		
+		for(CustomerDTO customer : customers.customers) {
+			
+			if(customer.phoneNumber==phoneNumber)
+				return true;
+			
+			
+		}
+		
+		return false;
+		
+	}
 	
 
 

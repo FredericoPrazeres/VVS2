@@ -214,7 +214,7 @@ public class TestCase2{
 		
 		vatInput.setValueAttribute("207527768");
 		designation.setValueAttribute("Joao");
-		phone.setValueAttribute("910242523");
+		phone.setValueAttribute("910203443");
 		submit.click();
 		
 		HtmlAnchor getCustomersLink = page.getAnchorByHref("GetAllCustomersPageController");
