@@ -53,13 +53,23 @@ public enum SaleService {
 	
 	
 	public void addSale(int customerVat) throws ApplicationException {
-		try {
-			SaleRowDataGateway sale = new SaleRowDataGateway(customerVat, new Date());
-			sale.insert();
+		
+		if(CustomerService.INSTANCE.customerExists(customerVat)) {
 			
-		} catch (PersistenceException e) {
-				throw new ApplicationException ("Can't add customer with vat number " + customerVat + ".", e);
+			try {
+				
+				SaleRowDataGateway sale = new SaleRowDataGateway(customerVat, new Date());
+				sale.insert();
+			
+			} catch (PersistenceException e) {
+					throw new ApplicationException ("Can't add customer with vat number " + customerVat + ".", e);
+			}
+			
+			
+		}else{
+			throw new ApplicationException ("Customer with vat number " + customerVat + " does not exist");
 		}
+		
 	}
 	
 	public void updateSale(int id) throws ApplicationException {
@@ -87,9 +97,28 @@ public enum SaleService {
 		}
 	}
 	
+	
+	
+	
 	public int addSaleDelivery(int sale_id, int addr_id) throws ApplicationException {
 		try {
+			
+			
 			SaleRowDataGateway s = new SaleRowDataGateway().getSaleById(sale_id);
+			
+			if(numberOfSaleDelivery(s.getCustomerVat(), sale_id)>=1)
+				throw new ApplicationException ("You can only add one delivery to a sale.");
+				
+			if(!CustomerService.INSTANCE.addressExists(s.getCustomerVat(), addr_id))
+				throw new ApplicationException ("The address specified does not exist");
+			
+			if(!saleExists(sale_id))
+				throw new ApplicationException ("The sale specified does not exist");
+			
+			if(saleClosed(sale_id))
+				throw new ApplicationException ("Can't add delivery to closed sale");
+				
+			
 			SaleDeliveryRowDataGateway sale = new SaleDeliveryRowDataGateway(sale_id, s.getCustomerVat() ,addr_id);
 			sale.insert();
 			return sale.getCustomerVat();
@@ -98,6 +127,85 @@ public enum SaleService {
 				throw new ApplicationException ("Can't add address to cutomer.", e);
 		}
 	}
+	
+	
+	/**
+	 * Counts the number of deliveries a sale has
+	 * 
+	 * @param vat The customer VAT
+	 * @param sale_id ID of the sale
+	 * 
+	 * @return The number of deliveries
+	 * @author Frederico Prazeres fc56269
+	 * 
+	 */
+	private int numberOfSaleDelivery(int vat,int sale_id) throws ApplicationException{
+		
+			
+		SalesDeliveryDTO sd = SaleService.INSTANCE.getSalesDeliveryByVat(vat);
+		int count = 0;
+		for(SaleDeliveryDTO saleDelivery : sd.sales_delivery) {
+			
+			if(saleDelivery.sale_id==sale_id)
+				count++;
+		}			
+		
+		return count;
+		
+	}
+	
+	
+	/**
+	 * Checks if a sale exits
+	 * 
+	 * @param sale_id ID of the sale
+	 * 
+	 * @return The number of deliveries
+	 * @author Frederico Prazeres fc56269
+	 * 
+	 */
+	private boolean saleExists(int sale_id) throws ApplicationException{
+		
+		SalesDTO sales = SaleService.INSTANCE.getAllSales();
+		
+		for(SaleDTO sale : sales.sales) {
+			
+			if(sale.id == sale_id)
+				return true;
+			
+			
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Checks if a sale is closed
+	 * 
+	 * @param sale_id ID of the sale
+	 * 
+	 * @return true if a sale is closed, false if it is not
+	 * @author Frederico Prazeres fc56269
+	 * 
+	 */
+	private boolean saleClosed(int sale_id) throws ApplicationException{
+		
+		SalesDTO sales = SaleService.INSTANCE.getAllSales();
+		
+		for(SaleDTO sale : sales.sales) {
+			
+			if(sale.id == sale_id) {
+				if(sale.statusId == "C")
+					return true;
+			}
+
+		}
+		
+		return false;
+	}
+	
+	
+	
 	
 	/**
 	 * Checks if a VAT number is valid.

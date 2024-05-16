@@ -111,6 +111,11 @@ public enum CustomerService {
 	}
 
 	 
+	
+	
+	
+	
+	
 	/**
 	 * Checks if a VAT number is valid.
 	 * 
@@ -144,6 +149,61 @@ public enum CustomerService {
 			checkDigitCalc = 0;
 		return checkDigit == checkDigitCalc;
 	}
+	
+	
+	
+	
+	
+	/**
+	 * Checks if a customer with a given VAT exists
+	 * 
+	 * @param VAT The number to be checked.
+	 * @return Whether the VAT is a customer or not.
+	 * @author Frederico Prazeres fc56269
+	 * 
+	 */
+	public boolean customerExists(int VAT) throws ApplicationException {
+		try {
+			
+			List<CustomerRowDataGateway> customers = new CustomerRowDataGateway().getAllCustomers();
+			for(CustomerRowDataGateway cust : customers) {
+			
+				if(cust.getVAT()==VAT)
+					return true;
+
+			}
+		} catch (PersistenceException e) {
+				throw new ApplicationException ("Error getting all customers", e);
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Checks if a customer has an address with a given id
+	 * 
+	 * @param customerVat The customer VAT
+	 * @param addressId ID of the address
+	 * 
+	 * @return Whether the customer has the given address
+	 * @author Frederico Prazeres fc56269
+	 * 
+	 */
+	public boolean addressExists(int customerVat, int addressId) throws ApplicationException {
+		
+		AddressesDTO ad = CustomerService.INSTANCE.getAllAddresses(customerVat);
+		
+		for(AddressDTO addressDTO : ad.addrs) {
+			
+			if(addressDTO.id == addressId)
+				return true;
+			
+		}
+		
+		return false;
+	}
+	
+	
 
 
 }

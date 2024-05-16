@@ -19,7 +19,7 @@ public class DBSetup {
 	
 	public static void startApplicationDatabaseForTesting() {
 
-		if (appDatabaseAlreadyStarted) // just do it once for the entire test suite;
+		if (appDatabaseAlreadyStarted)
 			return;
 
 		try {
@@ -30,17 +30,9 @@ public class DBSetup {
 		}
 	}
 
-	//////////////////////////////////////////
-	// Operations for populating test database
-
 	public static final Operation DELETE_ALL = deleteAllFrom("CUSTOMER", "SALE", "ADDRESS", "SALEDELIVERY");
-	public static final int NUM_INIT_CUSTOMERS;
-	public static final int NUM_INIT_SALES;
-	public static final int NUM_INIT_ADDRESSES;
-	public static final int NUM_INIT_SALES_DELIVERIES;
 	public static final Operation INSERT_CUSTOMER_SALE_DATA;
 	public static final Operation INSERT_CUSTOMER_ADDRESS_DATA;
-
 
 	static {
 
@@ -67,11 +59,6 @@ public class DBSetup {
 		
 		Insert insertSaleDeliveries = insertInto("SALEDELIVERY").columns("SALE_ID", "CUSTOMER_VAT", "ADDRESS_ID")
 			.values(1, 168027852, 1).build();
-		
-		NUM_INIT_ADDRESSES = insertAddresses.getRowCount();
-		NUM_INIT_SALES_DELIVERIES = insertSaleDeliveries.getRowCount();
-		NUM_INIT_CUSTOMERS = insertCustomers.getRowCount();
-		NUM_INIT_SALES = insertSales.getRowCount();
 		
 		INSERT_CUSTOMER_ADDRESS_DATA = sequenceOf(insertCustomers, insertAddresses);
 		INSERT_CUSTOMER_SALE_DATA = sequenceOf(insertCustomers, insertSales, insertSaleDeliveries, insertAddresses);
