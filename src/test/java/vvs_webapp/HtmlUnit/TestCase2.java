@@ -388,7 +388,17 @@ public class TestCase2{
 	}
 	
 	
-	/*
+	
+	
+	/**
+	 * 
+	 * This test checks if you add a customer, sale and delivery
+	 * every data is shown as expected
+	 * 
+	 * @throws IOException
+	 * @author Frederico Prazeres fc56269
+	 * 
+	 */
 	@Test
 	public void testSaleDelivery() throws IOException{
 		
@@ -398,7 +408,8 @@ public class TestCase2{
 		
 		HtmlAnchor getCustomerLink = page.getAnchorByHref("addCustomer.html");
 		HtmlPage nextPage = (HtmlPage) getCustomerLink.openLinkInNewWindow();
-	
+		
+		
 		HtmlForm getCustomerForm = nextPage.getForms().get(0);
 		HtmlInput vatInput = getCustomerForm.getInputByName("vat");
 		HtmlInput designation = getCustomerForm.getInputByName("designation");
@@ -408,15 +419,18 @@ public class TestCase2{
 		vatInput.setValueAttribute("274658933");
 		designation.setValueAttribute("Fred");
 		phone.setValueAttribute("910203443");
+		
 		submit.click();
 		
+		// SHOW CUSTOMER
+		
 		HtmlAnchor getCustomersLink = page.getAnchorByHref("GetAllCustomersPageController");
-		nextPage = (HtmlPage) getCustomersLink.openLinkInNewWindow();
+		HtmlPage customerPage = (HtmlPage) getCustomersLink.openLinkInNewWindow();
 		
 		
-		if( nextPage.getElementById("clients") != null) { // Tabela existe
+		if( customerPage.getElementById("clients") != null) { // Tabela existe
 			
-			HtmlTable table = nextPage.getHtmlElementById("clients");
+			HtmlTable table = customerPage.getHtmlElementById("clients");
 			
 			int tableSize = table.getRows().size();
 			
@@ -431,53 +445,8 @@ public class TestCase2{
 		
 		// ------------------------ INSERT CUSTOMER ------------------------ //
 		
-		// ------------------------ INSERT ADDRESS ------------------------ //
-		HtmlAnchor addCustomerLink = page.getAnchorByHref("addAddressToCustomer.html");
-		// click on it
-		nextPage = (HtmlPage) addCustomerLink.openLinkInNewWindow();
-
-		// get the page first form:
-		HtmlForm addAddresForm = nextPage.getForms().get(0);		
-		vatInput = addAddresForm.getInputByName("vat");
-		HtmlInput addressInput = addAddresForm.getInputByName("address");
-		HtmlInput doorInput = addAddresForm.getInputByName("door");
-		HtmlInput postalCodeInput = addAddresForm.getInputByName("postalCode");
-		HtmlInput localityInput = addAddresForm.getInputByName("locality");
-		submit = addAddresForm.getInputByValue("Insert");
-		
-		vatInput.setValueAttribute(VAT);
-		addressInput.setValueAttribute("Avenida da Liberdade");
-		doorInput.setValueAttribute("3");
-		postalCodeInput.setValueAttribute("1600");
-		localityInput.setValueAttribute("Lisboa");
-		submit.click();
-		
-		// ------------------------ INSERT ADDRESS ------------------------ //
-		
 		// ------------------------ INSERT SALE ------------------------ //
 		
-		HtmlAnchor getSaleLink3 = page.getAnchorByHref("getSales.html");
-		HtmlPage salePage3 = (HtmlPage) getSaleLink3.openLinkInNewWindow();
-		HtmlForm salePageForm3 = salePage3.getForms().get(0);
-		
-		vatInput = salePageForm3.getInputByName("customerVat");
-		submit = salePageForm3.getInputByValue("Get Sales");
-		
-		vatInput.setValueAttribute(VAT);
-		submit.click();
-		
-		HtmlAnchor getSaleLink4 = page.getAnchorByHref("GetSalePageController");
-		HtmlPage salePage4 = (HtmlPage) getSaleLink4.openLinkInNewWindow();
-		
-		//Para verificar que foi adicionada uma sale à tabela
-		int previousTableSize = -1;
-		if( salePage4.getElementById("table1") != null) {
-			HtmlTable table = salePage4.getHtmlElementById("table1");
-			if(previousTableSize<table.getRows().size()) {
-				previousTableSize = table.getRows().size();
-			}
-		}
-
 		HtmlAnchor getSaleLink = page.getAnchorByHref("addSale.html");
 		HtmlPage salePage = (HtmlPage) getSaleLink.openLinkInNewWindow();
 		
@@ -488,82 +457,71 @@ public class TestCase2{
 		vatInput.setValueAttribute(VAT);
 		submit.click();
 		
-		HtmlAnchor getSaleLink2 = page.getAnchorByHref("UpdateSaleStatusPageControler");
-		HtmlPage salePage2 = (HtmlPage) getSaleLink2.openLinkInNewWindow();
+		// SHOW SALE
 		
-		String id = "";
-		if( salePage2.getElementById("table1") != null) { // Tabela existe
+		getSaleLink = page.getAnchorByHref("getSales.html");		
+		HtmlPage listSales = (HtmlPage) getSaleLink.openLinkInNewWindow();
+		
+		HtmlForm getSaleForm2 = listSales.getForms().get(0);
+		vatInput = getSaleForm2.getInputByName("customerVat");
+		submit = getSaleForm2.getInputByValue("Get Sales");
+		
+		vatInput.setValueAttribute(VAT);
+		HtmlPage salesPage2 = (HtmlPage) submit.click();
+		
+		String saleId = "";
+		
+		if( salesPage2.getElementById("table1") != null) { // Tabela existe
+			HtmlTable table = (HtmlTable) salesPage2.getElementById("table1");
 			
-			HtmlTable table = salePage2.getHtmlElementById("table1");
+			//Verifica que a última sale adicionada está Open e pertence ao cliente
+			assertEquals(table.getCellAt(table.getRows().size()-1,3).asText(),"O");
+			assertEquals(table.getCellAt(table.getRows().size()-1,4).asText(),VAT);
 			
-			assertEquals(table.getRows().size(), previousTableSize+1);
-			
-			
-			// ID da sale
-			id = table.getCellAt(table.getRows().size()-1, 0).asText();
-			
+			saleId = table.getCellAt(table.getRowCount()-1, 0).asText();
 		}
 		
 		// ------------------------ INSERT SALE ------------------------ //
 		
-		// ------------------------ INSERT DELIVERY ------------------------ //		
+		// ------------------------ INSERT DELIVERY ------------------------ //
 		
 		HtmlAnchor getDeliveryLink = page.getAnchorByHref("saleDeliveryVat.html");
-		HtmlPage deliveryPage = (HtmlPage) getDeliveryLink.openLinkInNewWindow();
+		HtmlPage saleDelivery = (HtmlPage) getDeliveryLink.openLinkInNewWindow();
 		
-		HtmlForm getDeliveryForm = deliveryPage.getForms().get(0);
+		HtmlForm getDeliveryForm = saleDelivery.getForms().get(0);
 		vatInput = getDeliveryForm.getInputByName("vat");
 		submit = getDeliveryForm.getInputByValue("Get Customer");
-		
 		vatInput.setValueAttribute(VAT);
-		submit.click();
 		
-		HtmlAnchor getDeliveryInfoLink = page.getAnchorByHref("AddSaleDeliveryPageController");
-		HtmlPage deliveryInfoPage = (HtmlPage) getDeliveryInfoLink.openLinkInNewWindow();
-		HtmlForm deliveryInfoForm = deliveryInfoPage.getForms().get(0);
+		HtmlPage saleDelivery2 = submit.click();
+		HtmlForm saleDeliveryForm = saleDelivery2.getForms().get(0);
 		
-		HtmlInput addressIdInput = deliveryInfoForm.getInputByName("addr_id");
-		HtmlInput saleIdInput = deliveryInfoForm.getInputByName("sale_id");
-		submit = getDeliveryForm.getInputByValue("Insert");
+		HtmlInput addressInput = saleDeliveryForm.getInputByName("addr_id");
+		HtmlInput saleIdInput = saleDeliveryForm.getInputByName("sale_id");
+		submit = saleDeliveryForm.getInputByValue("Insert");
 		
-		addressIdInput.setValueAttribute("1");
-		saleIdInput.setValueAttribute(id);
-		submit.click();
+		addressInput.setValueAttribute("100");
+		saleIdInput.setValueAttribute(saleId);
+		
+		// SHOW DELIVERY
+		
+		HtmlPage saleDeliveriesPage = submit.click();
+		
+		if( saleDeliveriesPage.getElementById("table1") != null) { // Tabela existe
+			HtmlTable table = (HtmlTable) saleDeliveriesPage.getElementById("table1");
+			
+			//Verifica que a delivery foi adicionada
+			assertEquals(table.getCellAt(table.getRows().size()-1,1).asText(),saleId);
+			assertEquals(table.getCellAt(table.getRows().size()-1,2).asText(),"100");
+			
+		}
+		
 		
 		// ------------------------ INSERT DELIVERY ------------------------ //
 		
-
-		// ------------------------ SHOW DELIVERY ------------------------ //
-		
-		HtmlAnchor showDeliveryLink = page.getAnchorByHref("showDelivery.html");
-		HtmlPage showDeliveryPage = (HtmlPage) showDeliveryLink.openLinkInNewWindow();
-		HtmlForm showDeliveryPageForm = showDeliveryPage.getForms().get(0);
-		
-		vatInput = showDeliveryPageForm.getInputByName("vat");
-		vatInput.setValueAttribute(VAT);
-		showDeliveryPageForm.getInputByValue("Get Customer").click();
-		
-		getDeliveryInfoLink = page.getAnchorByHref("GetSaleDeliveryPageController");
-		deliveryInfoPage = (HtmlPage) getDeliveryInfoLink.openLinkInNewWindow();
-		
-		
-		String saleId = "-1";
-		String addressId = "-1";
-		//adicionei id à TABLE
-		if( deliveryInfoPage.getElementById("table1") != null) {
-			HtmlTable table = deliveryInfoPage.getHtmlElementById("table1");
-			
-			saleId = table.getCellAt(table.getRows().size()-1, 1).asText();
-			addressId = table.getCellAt(table.getRows().size()-1, 1).asText();
-		}
-		
-		assertEquals(saleId,id);
-		assertEquals(addressId,"1");
-		
-		
 	}
 	
-	*/
+	
 	
 	
 }

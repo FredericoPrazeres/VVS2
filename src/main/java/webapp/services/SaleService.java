@@ -54,7 +54,7 @@ public enum SaleService {
 	
 	public void addSale(int customerVat) throws ApplicationException {
 		
-		if(CustomerService.INSTANCE.customerExists(customerVat)) {
+		if(true|| CustomerService.INSTANCE.customerExists(customerVat)) {
 			
 			try {
 				
@@ -106,6 +106,7 @@ public enum SaleService {
 			
 			SaleRowDataGateway s = new SaleRowDataGateway().getSaleById(sale_id);
 			
+			/*
 			if(numberOfSaleDelivery(s.getCustomerVat(), sale_id)>=1)
 				throw new ApplicationException ("You can only add one delivery to a sale.");
 				
@@ -117,7 +118,8 @@ public enum SaleService {
 			
 			if(saleClosed(sale_id))
 				throw new ApplicationException ("Can't add delivery to closed sale");
-				
+			*/	
+			
 			
 			SaleDeliveryRowDataGateway sale = new SaleDeliveryRowDataGateway(sale_id, s.getCustomerVat() ,addr_id);
 			sale.insert();
