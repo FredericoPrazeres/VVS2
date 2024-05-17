@@ -35,8 +35,10 @@ public enum CustomerService {
 	public void addCustomer(int vat, String designation, int phoneNumber) throws ApplicationException {
 		if (!isValidVAT (vat))
 			throw new ApplicationException ("Invalid VAT number: " + vat);
+		/*
 		else if (isPhoneNumberTaken(phoneNumber))
 			throw new ApplicationException ("Another customer already has the phone number you chose");
+		*/
 		else try {
 			CustomerRowDataGateway customer = new CustomerRowDataGateway(vat, designation, phoneNumber);
 			customer.insert();

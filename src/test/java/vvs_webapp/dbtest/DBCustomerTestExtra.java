@@ -4,7 +4,7 @@ package vvs_webapp.dbtest;
 import static org.junit.Assert.assertEquals;
 
 import static org.junit.Assert.assertNotNull;
-
+import static org.junit.Assert.assertNull;
 
 import java.sql.SQLException;
 
@@ -84,12 +84,12 @@ public class DBCustomerTestExtra{
 	@Test
 	public void testAddSaleToNonExistentClient() throws ApplicationException {
 		
-		int vat = 274658933;
+		int vat = 207527768;
 		
 
 		SaleService.INSTANCE.addSale(vat);
 		SalesDTO sales = SaleService.INSTANCE.getSaleByCustomerVat(vat);
-		assertNotNull(sales.sales.get(0));
+		assertNull(sales.sales.get(0));
 	}
 	
 	

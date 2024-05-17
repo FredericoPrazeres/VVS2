@@ -63,6 +63,7 @@ public class TestCase2{
 		
 	}
 	
+	
 	@Before
 	public void setup() throws SQLException {
 
@@ -214,7 +215,7 @@ public class TestCase2{
 		
 		vatInput.setValueAttribute("207527768");
 		designation.setValueAttribute("Joao");
-		phone.setValueAttribute("910203443");
+		phone.setValueAttribute("910208443");
 		submit.click();
 		
 		HtmlAnchor getCustomersLink = page.getAnchorByHref("GetAllCustomersPageController");
@@ -233,7 +234,7 @@ public class TestCase2{
 			assertEquals(table.getCellAt(table.getRows().size()-2,2).asText(),"274658933");
 			
 			assertEquals(table.getCellAt(table.getRows().size()-1,0).asText(),"Joao");
-			assertEquals(table.getCellAt(table.getRows().size()-1,1).asText(),"910242523");
+			assertEquals(table.getCellAt(table.getRows().size()-1,1).asText(),"910208443");
 			assertEquals(table.getCellAt(table.getRows().size()-1,2).asText(),"207527768");
 			
 		}
@@ -304,18 +305,15 @@ public class TestCase2{
 		
 		if( salesPage2.getElementById("table1") != null) { // Tabela existe
 			HtmlTable table = (HtmlTable) salesPage2.getElementById("table1");
-			saleCountAfter = table.getRows().size();
+			saleCountAfter = table.getRows().size()-1;
 			
 			//Verifica que a última sale adicionada está Open e pertence ao cliente
 			assertEquals(table.getCellAt(table.getRows().size()-1,3).asText(),"O");
 			assertEquals(table.getCellAt(table.getRows().size()-1,4).asText(),VAT);
 		}
 		
-		// Verifica que foi adicionada uma nova sale à tabela
-		if(saleCountBefore==0)
-			assertEquals(1,saleCountAfter);
-		else
-			assertEquals(saleCountBefore+1,saleCountAfter);
+
+		assertEquals(saleCountBefore+1,saleCountAfter);
 		
 		
 	}
@@ -438,9 +436,9 @@ public class TestCase2{
 			HtmlTableCell phoneCell= table.getCellAt(tableSize-1, 1);
 			HtmlTableCell vatCell = table.getCellAt(tableSize-1, 2);	
 			
-			assertEquals(nameCell.asText(), "Fred");
-			assertEquals(phoneCell.asText(), "910203443");
-			assertEquals(vatCell.asText(), "274658933");
+			assertEquals("Fred", nameCell.asText() );
+			assertEquals("910203443",phoneCell.asText() );
+			assertEquals("274658933", vatCell.asText());
 		}
 		
 		// ------------------------ INSERT CUSTOMER ------------------------ //
@@ -475,8 +473,8 @@ public class TestCase2{
 			HtmlTable table = (HtmlTable) salesPage2.getElementById("table1");
 			
 			//Verifica que a última sale adicionada está Open e pertence ao cliente
-			assertEquals(table.getCellAt(table.getRows().size()-1,3).asText(),"O");
-			assertEquals(table.getCellAt(table.getRows().size()-1,4).asText(),VAT);
+			assertEquals("O",table.getCellAt(table.getRows().size()-1,3).asText());
+			assertEquals(VAT, table.getCellAt(table.getRows().size()-1,4).asText());
 			
 			saleId = table.getCellAt(table.getRowCount()-1, 0).asText();
 		}
@@ -511,8 +509,8 @@ public class TestCase2{
 			HtmlTable table = (HtmlTable) saleDeliveriesPage.getElementById("table1");
 			
 			//Verifica que a delivery foi adicionada
-			assertEquals(table.getCellAt(table.getRows().size()-1,1).asText(),saleId);
-			assertEquals(table.getCellAt(table.getRows().size()-1,2).asText(),"100");
+			assertEquals(saleId, table.getCellAt(table.getRows().size()-1,1).asText());
+			assertEquals("100", table.getCellAt(table.getRows().size()-1,2).asText());
 			
 		}
 		
