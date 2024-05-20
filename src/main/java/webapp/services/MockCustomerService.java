@@ -5,15 +5,6 @@ import webapp.persistence.PersistenceException;
 
 public class MockCustomerService {
 	
-    private static final MockCustomerService INSTANCE = new MockCustomerService();
-
-    private MockCustomerService() {
-    }
-
-    public static MockCustomerService getInstance() {
-        return INSTANCE;
-    }
-
     public void addCustomer(int vat, String designation, int phoneNumber) throws ApplicationException {
         if (!isValidVAT(vat))
             throw new ApplicationException("Invalid VAT number: " + vat);

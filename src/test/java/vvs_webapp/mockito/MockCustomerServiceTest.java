@@ -21,9 +21,9 @@ public class MockCustomerServiceTest {
 
     @Test(expected = ApplicationException.class)
     public void testAddCustomer_InvalidVat() throws Exception {
-        int vat = 123;
+        int vat = 533;
         String designation = "New Customer";
-        int phoneNumber = 987654321;
+        int phoneNumber = 941412222;
 
         customerService.addCustomer(vat, designation, phoneNumber);
     }
