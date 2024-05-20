@@ -42,8 +42,6 @@ public class DBCustomerTestExtra{
 
 	private static Destination dataSource;
 
-	// the tracker is static because JUnit uses a separate Test instance for every
-	// test method.
 	private static DbSetupTracker dbSetupTracker = new DbSetupTracker();
 
 	@BeforeClass

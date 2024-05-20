@@ -3,6 +3,15 @@ package webapp.services;
 import webapp.persistence.CustomerRowDataGateway;
 import webapp.persistence.PersistenceException;
 
+
+
+/**
+ * Customer Service Mocked class
+ * 
+ * 
+ * @author Frederico Prazeres fc56269
+ * @throws ApplicationException
+ */
 public class MockCustomerService {
 	
     public void addCustomer(int vat, String designation, int phoneNumber) throws ApplicationException {

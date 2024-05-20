@@ -33,8 +33,6 @@ public class TestCase2{
 
 	private static Destination dataSource;
 	
-	// the tracker is static because JUnit uses a separate Test instance for every
-	// test method.
 	private static DbSetupTracker dbSetupTracker = new DbSetupTracker();
 	
 	private static final String APPLICATION_URL = "http://localhost:8080/VVS_webappdemo/";
@@ -72,8 +70,7 @@ public class TestCase2{
 		 , INSERT_CUSTOMER_ADDRESS_DATA
 		);
 		DbSetup dbSetup = new DbSetup(dataSource, initDBOperations);
-		// Use the tracker to launch the DBSetup.
-		// This will speed-up tests that do not change the DB. 
+
 		dbSetupTracker.launchIfNecessary(dbSetup);
 
 	}

@@ -19,6 +19,13 @@ public class MockCustomerServiceTest {
         MockitoAnnotations.initMocks(this);
     }
 
+	/**
+	 * 
+	 * Mockito test, adding a customer with invalid VATs
+	 * 
+	 * @author Frederico Prazeres fc56269
+	 * @throws ApplicationException
+	 */
     @Test(expected = ApplicationException.class)
     public void testAddCustomer_InvalidVat() throws Exception {
         int vat = 533;
